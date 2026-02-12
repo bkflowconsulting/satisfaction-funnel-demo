@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Satisfaction Funnel | Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d0d0d;
+    --paper: #faf8f4;
+    --gold: #c9a84c;
+    --gold-light: #e8d48a;
+    --deep: #1a1a2e;
+    --green: #2d6a4f;
+    --green-light: #40916c;
+    --red: #a4262c;
+    --muted: #7a7a7a;
+    --border: #e2ddd5;
+    --card: #ffffff;
+    --shadow: 0 4px 24px rgba(13,13,13,0.08);
+    --shadow-lg: 0 16px 48px rgba(13,13,13,0.14);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  /* ─── HEADER / BRAND ─── */
+  .header {
+    text-align: center;
+    padding: 52px 24px 32px;
+    position: relative;
+    z-index: 1;
+  }
+  .brand-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 5px 14px;
+    border-radius: 2px;
+    margin-bottom: 18px;
+    background: rgba(201,168,76,0.06);
+  }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 5vw, 54px);
+    font-weight: 900;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    color: var(--deep);
+  }
+  .header h1 span { color: var(--gold); }
+  .header p {
+    margin-top: 14px;
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 520px;
+    margin-inline: auto;
+    line-height: 1.65;
+  }
+
+  /* ─── FLOW DIAGRAM ─── */
+  .flow-section {
+    max-width: 900px;
+    margin: 10px auto 0;
+    padding: 0 24px 48px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .flow-label {
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 24px;
+    font-weight: 600;
+  }
+
+  .flow-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
+
+  .flow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 110px;
+  }
+
+  .flow-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    background: var(--card);
+    border: 2px solid var(--border);
+    box-shadow: var(--shadow);
+    transition: transform 0.2s;
+  }
+
+  .flow-step.active .flow-icon {
+    background: var(--deep);
+    border-color: var(--deep);
+    transform: scale(1.1);
+    box-shadow: 0 8px 24px rgba(26,26,46,0.25);
+  }
+
+  .flow-step-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    max-width: 90px;
+    line-height: 1.3;
+  }
+
+  .flow-step.active .flow-step-label { color: var(--deep); }
+
+  .flow-arrow {
+    font-size: 18px;
+    color: var(--border);
+    margin: 0 4px;
+    padding-bottom: 20px;
+    flex-shrink: 0;
+  }
+
+  .flow-branch {
+    display: flex;
+    gap: 0;
+    align-items: flex-start;
+    margin-top: 0;
+  }
+
+  /* ─── MAIN CARD ─── */
+  .demo-wrapper {
+    max-width: 520px;
+    margin: 0 auto 64px;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 40px 40px 36px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+  }
+
+  /* ─── SCREENS ─── */
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeUp 0.4s ease both; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SMS Preview */
+  .sms-bubble-wrap {
+    background: #f0f0f5;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 28px;
+  }
+  .sms-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #ddd;
+  }
+  .sms-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--deep), var(--gold));
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 14px; font-weight: 700;
+  }
+  .sms-sender { font-size: 13px; font-weight: 600; color: #111; }
+  .sms-time { font-size: 11px; color: #999; margin-left: auto; }
+  .sms-text {
+    background: #fff;
+    border-radius: 10px 10px 10px 2px;
+    padding: 14px 16px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #222;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .sms-link {
+    color: #007aff;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  /* Screen headings */
+  .screen-eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .screen-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--deep);
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+  .screen-sub {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 28px;
+    line-height: 1.55;
+  }
+
+  /* Questions */
+  .question-block {
+    margin-bottom: 26px;
+  }
+  .question-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 10px;
+    line-height: 1.45;
+  }
+  .question-num {
+    display: inline-block;
+    width: 22px; height: 22px;
+    background: var(--deep);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 22px;
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+
+  /* Star Rating */
+  .stars {
+    display: flex;
+    gap: 6px;
+  }
+  .star {
+    font-size: 30px;
+    cursor: pointer;
+    color: #ddd;
+    transition: color 0.15s, transform 0.15s;
+    user-select: none;
+    line-height: 1;
+  }
+  .star:hover, .star.filled { color: var(--gold); transform: scale(1.15); }
+  .star.filled { animation: popStar 0.2s ease; }
+
+  @keyframes popStar {
+    0%   { transform: scale(1.15); }
+    50%  { transform: scale(1.35); }
+    100% { transform: scale(1.15); }
+  }
+
+  .score-display {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 5px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    min-height: 16px;
+    transition: color 0.2s;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 22px 0;
+  }
+
+  /* Score Tally */
+  .score-tally {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 18px 0 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+  }
+  .tally-label { color: var(--muted); font-weight: 500; }
+  .tally-score {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--deep);
+  }
+  .tally-score span { font-size: 13px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-weight: 400; }
+
+  /* Buttons */
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 15px 24px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .btn-primary {
+    background: var(--deep);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: #2a2a4a;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(26,26,46,0.25);
+  }
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold), #b8943f);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(201,168,76,0.35);
+  }
+  .btn-gold:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(201,168,76,0.45);
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .btn-outline:hover { background: var(--paper); color: var(--ink); }
+
+  /* Routing indicator */
+  .route-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    letter-spacing: 0.04em;
+  }
+  .route-badge.happy {
+    background: #e8f5ee;
+    color: var(--green);
+    border: 1px solid #b7dfc9;
+  }
+  .route-badge.private {
+    background: #fef0f0;
+    color: var(--red);
+    border: 1px solid #f4c2c4;
+  }
+  .route-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .route-badge.happy .route-dot { background: var(--green); }
+  .route-badge.private .route-dot { background: var(--red); }
+
+  /* Referral */
+  .referral-chips {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 14px 0;
+  }
+  .ref-chip {
+    padding: 9px 16px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 2px solid var(--border);
+    background: var(--paper);
+    color: var(--ink);
+    transition: all 0.18s;
+  }
+  .ref-chip:hover, .ref-chip.selected {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.1);
+    color: var(--deep);
+    font-weight: 600;
+  }
+
+  /* Thank-you / done states */
+  .big-emoji {
+    font-size: 56px;
+    margin-bottom: 16px;
+    display: block;
+    animation: bounceIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  @keyframes bounceIn {
+    from { transform: scale(0); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  .pill-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 16px 0 24px;
+  }
+  .pill-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .pill-check {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--green);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  /* GHL badge */
+  .ghl-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #edf4ff;
+    border: 1px solid #c5d9f9;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #2552a3;
+    margin-top: 20px;
+    font-weight: 500;
+  }
+  .ghl-note .ghl-icon { font-size: 16px; flex-shrink: 0; }
+
+  /* Navigation breadcrumb */
+  .progress-bar-wrap {
+    margin-bottom: 28px;
+  }
+  .progress-steps {
+    display: flex;
+    gap: 5px;
+  }
+  .p-step {
+    height: 4px;
+    flex: 1;
+    border-radius: 2px;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+  .p-step.done { background: var(--gold); }
+
+  /* Textarea */
+  textarea {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    resize: vertical;
+    min-height: 80px;
+    background: var(--paper);
+    transition: border-color 0.2s;
+    margin-top: 8px;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: #fff;
+  }
+
+  /* ─── BOTTOM PANEL: FLOW EXPLAINER ─── */
+  .explainer {
+    max-width: 900px;
+    margin: 0 auto 80px;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .explainer-title {
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--deep);
+    margin-bottom: 24px;
+  }
+
+  .explainer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .ex-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 20px;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .ex-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+
+  .ex-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .ex-card h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--deep);
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
+  }
+
+  .ex-card p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  /* Reset link */
+  .reset-link {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    text-decoration: underline;
+    display: block;
+  }
+  .reset-link:hover { color: var(--ink); }
+
+  @media (max-width: 540px) {
+    .card { padding: 28px 22px; }
+    .flow-steps { gap: 2px; }
+    .flow-arrow { font-size: 14px; }
+    .flow-step { min-width: 80px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<div class="header">
+  <div class="brand-tag">GoHighLevel Automation Demo</div>
+  <h1>Reputation<br><span>On Autopilot</span></h1>
+  <p>A fully automated post-job satisfaction funnel that routes happy clients to Google Reviews and protects you from public negative feedback.</p>
+</div>
+
+<!-- ─── FLOW DIAGRAM ─── -->
+<div class="flow-section">
+  <div class="flow-label">Automation Flow</div>
+  <div class="flow-steps" id="flowSteps">
+    <div class="flow-step" id="fs-1">
+      <div class="flow-icon">✅</div>
+      <div class="flow-step-label">Job Complete</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" id="fs-2">
+      <div class="flow-icon">📱</div>
+      <div class="flow-step-label">SMS / Email Sent</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" id="fs-3">
+      <div class="flow-icon">⭐</div>
+      <div class="flow-step-label">Survey (3 Qs)</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" id="fs-4">
+      <div class="flow-icon">🔀</div>
+      <div class="flow-step-label">Score Routing</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" id="fs-5">
+      <div class="flow-icon">🌟</div>
+      <div class="flow-step-label">Review / Rescue</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── DEMO CARD ─── -->
+<div class="demo-wrapper">
+  <div class="card">
+
+    <!-- SCREEN 0: SMS Trigger -->
+    <div class="screen active" id="screen-0">
+      <div class="screen-eyebrow">Step 1 — Automated Trigger</div>
+      <div class="screen-title">Job Marked Complete</div>
+      <div class="screen-sub">The moment a job is marked complete in GHL, this SMS fires automatically — no manual action needed.</div>
+
+      <div class="sms-bubble-wrap">
+        <div class="sms-header">
+          <div class="sms-avatar">AC</div>
+          <div>
+            <div class="sms-sender">Apex Contracting</div>
+          </div>
+          <div class="sms-time">Just now</div>
+        </div>
+        <div class="sms-text">
+          Hi <strong>Sarah</strong> 👋 Thank you for choosing us! We just wrapped up your project and we'd love to hear how we did. It only takes 60 seconds:<br><br>
+          <span class="sms-link" onclick="goTo(1)">→ Share your experience</span>
+        </div>
+      </div>
+
+      <div class="ghl-note">
+        <span class="ghl-icon">⚡</span>
+        GHL Trigger: <strong>Opportunity Stage → "Won / Complete"</strong> fires this workflow automatically
+      </div>
+
+      <br>
+      <button class="btn btn-primary" onclick="goTo(1)">Open Survey Link →</button>
+    </div>
+
+    <!-- SCREEN 1: Survey -->
+    <div class="screen" id="screen-1">
+      <div class="progress-bar-wrap">
+        <div class="progress-steps">
+          <div class="p-step done"></div>
+          <div class="p-step done"></div>
+          <div class="p-step"></div>
+          <div class="p-step"></div>
+          <div class="p-step"></div>
+        </div>
+      </div>
+
+      <div class="screen-eyebrow">Step 2 — Satisfaction Check</div>
+      <div class="screen-title">How did we do, Sarah?</div>
+      <div class="screen-sub">Rate each question honestly — this helps us improve and serve you better.</div>
+
+      <!-- Q1 -->
+      <div class="question-block">
+        <div class="question-text"><span class="question-num">1</span>Overall, how satisfied were you with the quality of our work?</div>
+        <div class="stars" data-q="1">
+          <span class="star" data-v="1">★</span>
+          <span class="star" data-v="2">★</span>
+          <span class="star" data-v="3">★</span>
+          <span class="star" data-v="4">★</span>
+          <span class="star" data-v="5">★</span>
+        </div>
+        <div class="score-display" id="sd-1"></div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Q2 -->
+      <div class="question-block">
+        <div class="question-text"><span class="question-num">2</span>How would you rate our team's professionalism & communication?</div>
+        <div class="stars" data-q="2">
+          <span class="star" data-v="1">★</span>
+          <span class="star" data-v="2">★</span>
+          <span class="star" data-v="3">★</span>
+          <span class="star" data-v="4">★</span>
+          <span class="star" data-v="5">★</span>
+        </div>
+        <div class="score-display" id="sd-2"></div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Q3 -->
+      <div class="question-block">
+        <div class="question-text"><span class="question-num">3</span>How likely are you to use our services again in the future?</div>
+        <div class="stars" data-q="3">
+          <span class="star" data-v="1">★</span>
+          <span class="star" data-v="2">★</span>
+          <span class="star" data-v="3">★</span>
+          <span class="star" data-v="4">★</span>
+          <span class="star" data-v="5">★</span>
+        </div>
+        <div class="score-display" id="sd-3"></div>
+      </div>
+
+      <div class="score-tally">
+        <div class="tally-label">Your Score</div>
+        <div class="tally-score" id="totalScore">—<span> / 15</span></div>
+      </div>
+
+      <button class="btn btn-primary" id="submitBtn" onclick="submitSurvey()" disabled style="opacity:0.4">Submit My Feedback</button>
+    </div>
+
+    <!-- SCREEN 2A: HAPPY PATH -->
+    <div class="screen" id="screen-2a">
+      <div class="progress-bar-wrap">
+        <div class="progress-steps">
+          <div class="p-step done"></div><div class="p-step done"></div>
+          <div class="p-step done"></div><div class="p-step done"></div>
+          <div class="p-step done"></div>
+        </div>
+      </div>
+
+      <div class="route-badge happy"><span class="route-dot"></span> Happy Customer Detected — Score ≥ 13/15</div>
+
+      <span class="big-emoji">🎉</span>
+      <div class="screen-eyebrow">Step 3 — Redirecting to Google</div>
+      <div class="screen-title">You made our day, Sarah!</div>
+      <div class="screen-sub">Your score of <strong id="happyScoreDisplay"></strong>/15 means everything to us. We're sending you to Google to share your experience — it only takes 30 seconds!</div>
+
+      <!-- Countdown ring -->
+      <div style="display:flex; flex-direction:column; align-items:center; margin: 22px 0 18px;">
+        <div style="position:relative; width:90px; height:90px;">
+          <svg width="90" height="90" style="transform:rotate(-90deg)">
+            <circle cx="45" cy="45" r="38" fill="none" stroke="var(--border)" stroke-width="6"/>
+            <circle id="countdownRing" cx="45" cy="45" r="38" fill="none" stroke="var(--gold)" stroke-width="6"
+              stroke-dasharray="238.76" stroke-dashoffset="0"
+              style="transition: stroke-dashoffset 1s linear;"/>
+          </svg>
+          <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+            <span id="countdownNum" style="font-family:'Playfair Display',serif; font-size:28px; font-weight:900; color:var(--deep); line-height:1;">3</span>
+            <span style="font-size:10px; color:var(--muted); font-weight:600; letter-spacing:0.08em;">SEC</span>
+          </div>
+        </div>
+        <div style="margin-top:10px; font-size:13px; color:var(--muted); font-weight:500;">Taking you to Google Reviews…</div>
+      </div>
+
+      <button class="btn btn-gold" onclick="goToGoogleNow()" style="margin-bottom:10px">⭐ Go Now — Don't Wait</button>
+
+      <div class="ghl-note" style="margin-bottom:18px">
+        <span class="ghl-icon">⚡</span>
+        GHL: Auto-redirect fires immediately after score submission — zero clicks needed
+      </div>
+
+      <hr class="divider">
+
+      <div class="screen-eyebrow" style="margin-bottom:6px">Before You Go — Quick Referral</div>
+      <div style="font-size:14px; font-weight:600; color:var(--ink); margin-bottom:6px">Know anyone who might need us?</div>
+      <div style="font-size:13px; color:var(--muted); margin-bottom:12px;">Select anyone who comes to mind — we'll follow up (no spam, promise).</div>
+
+      <div class="referral-chips" id="refChips">
+        <div class="ref-chip" onclick="toggleChip(this)">👨‍👩‍👧 Family</div>
+        <div class="ref-chip" onclick="toggleChip(this)">🏠 Neighbor</div>
+        <div class="ref-chip" onclick="toggleChip(this)">💼 Coworker</div>
+        <div class="ref-chip" onclick="toggleChip(this)">👥 Friend</div>
+        <div class="ref-chip" onclick="toggleChip(this)">Not right now</div>
+      </div>
+    </div>
+
+    <!-- SCREEN 2B: UNHAPPY PATH -->
+    <div class="screen" id="screen-2b">
+      <div class="progress-bar-wrap">
+        <div class="progress-steps">
+          <div class="p-step done"></div><div class="p-step done"></div>
+          <div class="p-step done"></div><div class="p-step done"></div>
+          <div class="p-step"></div>
+        </div>
+      </div>
+
+      <div class="route-badge private"><span class="route-dot"></span> Private Feedback Route — Score &lt; 13/15</div>
+
+      <span class="big-emoji">💬</span>
+      <div class="screen-eyebrow">Step 3 — Private Feedback</div>
+      <div class="screen-title">We hear you, Sarah.</div>
+      <div class="screen-sub">It looks like something didn't meet your expectations — and that matters to us. Please tell us what happened so we can make it right.</div>
+
+      <textarea placeholder="Tell us what we could have done better. We'll personally reach out within 24 hours..." id="feedbackText"></textarea>
+
+      <div class="ghl-note" style="margin-top:14px; margin-bottom:16px">
+        <span class="ghl-icon">⚡</span>
+        GHL: Creates internal task + sends owner alert with score + feedback instantly
+      </div>
+
+      <button class="btn btn-primary" onclick="goTo(4)" style="margin-top:4px">Send Private Feedback</button>
+      <div class="reset-link" onclick="goTo(0)">← Never mind, go back</div>
+    </div>
+
+    <!-- SCREEN 3: DONE HAPPY -->
+    <div class="screen" id="screen-3">
+      <span class="big-emoji">🌟</span>
+      <div class="screen-title">Thank you so much!</div>
+      <div class="screen-sub" style="margin-bottom:20px">You've been a fantastic customer, Sarah. Here's what just happened automatically:</div>
+
+      <div class="pill-list">
+        <div class="pill-item"><div class="pill-check">✓</div> Survey recorded in GHL CRM</div>
+        <div class="pill-item"><div class="pill-check">✓</div> Google Review link sent & tracked</div>
+        <div class="pill-item"><div class="pill-check">✓</div> Referral tag added to your contact</div>
+        <div class="pill-item"><div class="pill-check">✓</div> Follow-up referral sequence queued</div>
+      </div>
+
+      <button class="btn btn-gold" onclick="resetDemo()">↺ Restart Demo</button>
+    </div>
+
+    <!-- SCREEN 4: DONE UNHAPPY -->
+    <div class="screen" id="screen-4">
+      <span class="big-emoji">🤝</span>
+      <div class="screen-title">We're on it.</div>
+      <div class="screen-sub" style="margin-bottom:20px">Your feedback has been sent privately to the owner. Here's what's happening behind the scenes:</div>
+
+      <div class="pill-list">
+        <div class="pill-item"><div class="pill-check">✓</div> Feedback saved privately in GHL</div>
+        <div class="pill-item"><div class="pill-check">✓</div> Owner notified immediately</div>
+        <div class="pill-item"><div class="pill-check">✓</div> Internal task created for follow-up</div>
+        <div class="pill-item"><div class="pill-check" style="background:var(--red)">✗</div> <strong>NOT posted to any public review platform</strong></div>
+      </div>
+
+      <div class="ghl-note">
+        <span class="ghl-icon">🛡️</span>
+        Reputation protected — negative feedback stays private, not on Google
+      </div>
+
+      <button class="btn btn-primary" onclick="resetDemo()" style="margin-top:20px">↺ Restart Demo</button>
+    </div>
+
+  </div>
+  <a class="reset-link" onclick="resetDemo()" id="resetBtn" style="display:none">↺ Restart Demo</a>
+</div>
+
+<!-- ─── EXPLAINER CARDS ─── -->
+<div class="explainer">
+  <div class="explainer-title">What This Automation Does For You</div>
+  <div class="explainer-grid">
+    <div class="ex-card">
+      <span class="ex-icon">🤖</span>
+      <h3>Zero Manual Work</h3>
+      <p>Triggers the moment a job closes in GHL. No staff follow-up needed — ever.</p>
+    </div>
+    <div class="ex-card">
+      <span class="ex-icon">🔀</span>
+      <h3>Smart Routing</h3>
+      <p>13/15+ score → Google Review. Below that → private owner feedback only.</p>
+    </div>
+    <div class="ex-card">
+      <span class="ex-icon">🛡️</span>
+      <h3>Reputation Guard</h3>
+      <p>Unhappy customers never reach a public review platform. Problems stay in-house.</p>
+    </div>
+    <div class="ex-card">
+      <span class="ex-icon">🌟</span>
+      <h3>Review Compounding</h3>
+      <p>Every happy customer is instantly prompted to leave a 5-star Google review.</p>
+    </div>
+    <div class="ex-card">
+      <span class="ex-icon">👥</span>
+      <h3>Built-In Referrals</h3>
+      <p>Happy customers are asked for referrals in the same flow — no extra touchpoint needed.</p>
+    </div>
+    <div class="ex-card">
+      <span class="ex-icon">📊</span>
+      <h3>CRM Data</h3>
+      <p>Every score, response, and referral is logged in GHL for reporting and segmentation.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const ratings = { 1: 0, 2: 0, 3: 0 };
+  const labels = ['', 'Poor 😬', 'Below Average 😐', 'Average 🙂', 'Good 👍', 'Excellent 🤩'];
+
+  // Star rating logic
+  document.querySelectorAll('.stars').forEach(group => {
+    const q = parseInt(group.dataset.q);
+    const stars = group.querySelectorAll('.star');
+
+    stars.forEach(star => {
+      star.addEventListener('mouseenter', () => {
+        const v = parseInt(star.dataset.v);
+        stars.forEach(s => s.classList.toggle('filled', parseInt(s.dataset.v) <= v));
+      });
+
+      star.addEventListener('click', () => {
+        const v = parseInt(star.dataset.v);
+        ratings[q] = v;
+        stars.forEach(s => {
+          s.classList.toggle('filled', parseInt(s.dataset.v) <= v);
+        });
+        document.getElementById('sd-' + q).textContent = labels[v];
+        document.getElementById('sd-' + q).style.color = v >= 4 ? '#2d6a4f' : v === 3 ? '#c9a84c' : '#a4262c';
+        updateTotal();
+      });
+
+      group.addEventListener('mouseleave', () => {
+        stars.forEach(s => s.classList.toggle('filled', parseInt(s.dataset.v) <= ratings[q]));
+      });
+    });
+  });
+
+  function updateTotal() {
+    const total = ratings[1] + ratings[2] + ratings[3];
+    const el = document.getElementById('totalScore');
+    el.innerHTML = `${total || '—'}<span> / 15</span>`;
+
+    const allRated = ratings[1] > 0 && ratings[2] > 0 && ratings[3] > 0;
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = !allRated;
+    btn.style.opacity = allRated ? '1' : '0.4';
+
+    if (allRated) {
+      el.style.color = total >= 13 ? 'var(--green)' : total >= 9 ? 'var(--gold)' : 'var(--red)';
+    }
+  }
+
+  let countdownTimer = null;
+
+  function submitSurvey() {
+    const total = ratings[1] + ratings[2] + ratings[3];
+    if (total >= 13) {
+      document.getElementById('happyScoreDisplay').textContent = total;
+      goTo('2a');
+      activateFlow(5);
+      startCountdown();
+    } else {
+      goTo('2b');
+      activateFlow(5);
+    }
+  }
+
+  function startCountdown() {
+    let seconds = 3;
+    const numEl = document.getElementById('countdownNum');
+    const ring = document.getElementById('countdownRing');
+    const circumference = 238.76;
+
+    // Reset ring
+    ring.style.transition = 'none';
+    ring.style.strokeDashoffset = '0';
+
+    // Force reflow then animate
+    void ring.getBoundingClientRect();
+    ring.style.transition = 'stroke-dashoffset 1s linear';
+
+    if (countdownTimer) clearInterval(countdownTimer);
+
+    function tick() {
+      // Animate ring draining for this second
+      ring.style.strokeDashoffset = String(circumference * ((3 - seconds + 1) / 3));
+      numEl.textContent = seconds;
+
+      if (seconds <= 0) {
+        clearInterval(countdownTimer);
+        goToGoogleNow();
+      }
+      seconds--;
+    }
+
+    tick(); // immediate first tick
+    countdownTimer = setInterval(tick, 1000);
+  }
+
+  function goToGoogleNow() {
+    if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+    window.open('https://g.page/r/Cad64-wqyFgFEAE/review', '_blank');
+    goTo(3);
+  }
+
+  function goTo(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+
+    if (id === '2a' || id === '2b') activateFlow(4);
+    if (id === 1) activateFlow(3);
+    if (id === 0) activateFlow(1);
+  }
+
+  function toggleChip(el) {
+    el.classList.toggle('selected');
+  }
+
+  function activateFlow(upTo) {
+    for (let i = 1; i <= 5; i++) {
+      const el = document.getElementById('fs-' + i);
+      el.classList.toggle('active', i <= upTo);
+    }
+  }
+
+  function resetDemo() {
+    if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+    ratings[1] = 0; ratings[2] = 0; ratings[3] = 0;
+    document.querySelectorAll('.star').forEach(s => s.classList.remove('filled'));
+    document.querySelectorAll('.score-display').forEach(s => { s.textContent = ''; });
+    document.getElementById('totalScore').innerHTML = '—<span> / 15</span>';
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('submitBtn').style.opacity = '0.4';
+    if (document.getElementById('feedbackText')) document.getElementById('feedbackText').value = '';
+    document.querySelectorAll('.ref-chip').forEach(c => c.classList.remove('selected'));
+    goTo(0);
+    activateFlow(2);
+  }
+
+  // Init
+  activateFlow(2);
+</script>
+</body>
+</html>
